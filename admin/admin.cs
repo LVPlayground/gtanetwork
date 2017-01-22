@@ -21,9 +21,17 @@ public class AdminScript : Script
                 API.sendChatMessageToPlayer(sender, "~r~ERROR:~w~ No account found with your name.");
                 break;
             case 3:
-            case 1:
-                API.sendChatMessageToPlayer(sender, "~g~Login successful!~w~ Logged in as ~b~" + API.getPlayerAclGroup(sender) + "~w~.");
-                break;
+            case 1: {
+                    var playerAclGroup = API.getPlayerAclGroup(sender);
+                    API.sendChatMessageToPlayer(sender, "~g~Login successful!~w~ Logged in as ~b~" + playerAclGroup + "~w~. Please check '/help'.");
+                    foreach (var player in API.getAllPlayers())
+                    {
+                        if (API.isPlayerLoggedIn(player) && player != sender) {
+                            API.sendChatMessageToPlayer(player, string.Format("Player '{0}' from group '{1}' is now loggedin.", sender.name, playerAclGroup));
+                        }
+                    }
+                    break;
+                }
             case 2:
                 API.sendChatMessageToPlayer(sender, "~r~ERROR:~w~ Wrong password!");
                 break;
@@ -59,16 +67,16 @@ public class AdminScript : Script
     {
         if (!API.doesResourceExist(resource))
         {
-            API.sendChatMessageToPlayer(sender, "~r~No such resource found: \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~r~No such resource found: '" + resource + "'");
         }
         else if (API.isResourceRunning(resource))
         {
-            API.sendChatMessageToPlayer(sender, "~r~Resource \"" + resource + "\" is already running!");
+            API.sendChatMessageToPlayer(sender, "~r~Resource '" + resource + "' is already running!");
         }
         else
         {
             API.startResource(resource);
-            API.sendChatMessageToPlayer(sender, "~g~Started resource \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~g~Started resource '" + resource + "'");
         }
     }
 
@@ -77,16 +85,16 @@ public class AdminScript : Script
     {
         if (!API.doesResourceExist(resource))
         {
-            API.sendChatMessageToPlayer(sender, "~r~No such resource found: \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~r~No such resource found: '" + resource + "'");
         }
         else if (!API.isResourceRunning(resource))
         {
-            API.sendChatMessageToPlayer(sender, "~r~Resource \"" + resource + "\" is not running!");
+            API.sendChatMessageToPlayer(sender, "~r~Resource '" + resource + "' is not running!");
         }
         else
         {
             API.stopResource(resource);
-            API.sendChatMessageToPlayer(sender, "~g~Stopped resource \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~g~Stopped resource '" + resource + "'");
         }
     }
 
@@ -99,11 +107,11 @@ public class AdminScript : Script
             API.stopResource(resource);
             API.startResource(resource);
 
-            API.sendChatMessageToPlayer(sender, "~g~Restarted resource \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~g~Restarted resource '" + resource + "'");
         }
         else
         {
-            API.sendChatMessageToPlayer(sender, "~r~No such resource found: \"" + resource + "\"");
+            API.sendChatMessageToPlayer(sender, "~r~No such resource found: '" + resource + "'");
         }
     }
 
@@ -150,5 +158,11 @@ public class AdminScript : Script
         {
 			API.sendChatMessageToPlayer(player, "Please log in with ~b~/login [password]");
         }
+    }
+
+    [Command(ACLRequired = true)]
+    public void Help(Client player)
+    {
+        API.sendChatMessageToPlayer(player, "/settime [hour] [minute], /setweather [weatherId], /kick [player] [reason], /kill [player], /logout");
     }
 }
