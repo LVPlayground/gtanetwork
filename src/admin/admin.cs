@@ -1,4 +1,8 @@
 using GTANetworkServer;
+using GTANetworkShared;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class AdminScript : Script
 {
@@ -127,25 +131,10 @@ public class AdminScript : Script
         API.setPlayerHealth(target, -1);
     }
 
-	private void onResStart()
-	{
-		
-	}
-
 	public void onPlayerDisconnected(Client player, string reason)
 	{
 		API.logoutPlayer(player);
 	}
-
-	public void onUpdate()
-	{
-		
-	}
-
-	public void onDeath(Client player)
-	{
-		
-	}	
 
 	public void OnPlayerConnected(Client player)
     {    	
@@ -163,6 +152,23 @@ public class AdminScript : Script
     [Command(ACLRequired = true)]
     public void Help(Client player)
     {
-        API.sendChatMessageToPlayer(player, "/settime [hour] [minute], /setweather [weatherId], /kick [player] [reason], /kill [player], /logout");
+        API.sendChatMessageToPlayer(player, "/settime, /setweather, /kick, /kill, /logout");
+    }
+
+    [Command("v", ACLRequired = true)]
+    public void onVehicleCommand(Client player, string vehicleIdOrName)
+    {
+        var playerPosition = API.getEntityPosition(player);
+        var playerRotation = API.getEntityRotation(player);
+        var vehicleDictionary = new Dictionary<string, VehicleHash>();
+
+        foreach (var vehicleHash in Enum.GetValues(typeof(VehicleHash)).Cast<VehicleHash>())
+        {
+            vehicleDictionary.Add(vehicleHash.ToString(), vehicleHash);
+        }
+
+        var vehicle = vehicleDictionary.FirstOrDefault(v => v.Key.StartsWith(vehicleIdOrName)).Value;
+
+        API.createVehicle(vehicle, playerPosition, playerRotation, 0, 0);
     }
 }
