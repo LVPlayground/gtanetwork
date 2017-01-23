@@ -131,13 +131,28 @@ public class AdminScript : Script
         API.setPlayerHealth(target, -1);
     }
 
+    private void onResStart()
+    {
+
+    }
+
 	public void onPlayerDisconnected(Client player, string reason)
 	{
 		API.logoutPlayer(player);
 	}
 
+    public void onUpdate()
+    {
+
+    }
+
+    public void onDeath(Client player)
+    {
+
+    }
+
 	public void OnPlayerConnected(Client player)
-    {    	
+    {
         var log = API.loginPlayer(player, "");
         if (log == 1)
         {
@@ -152,11 +167,11 @@ public class AdminScript : Script
     [Command(ACLRequired = true)]
     public void Help(Client player)
     {
-        API.sendChatMessageToPlayer(player, "/settime, /setweather, /kick, /kill, /logout");
+        API.sendChatMessageToPlayer(player, "/settime, /setweather, /kick, /kill, /v, /vr, /logout");
     }
 
     [Command("v", ACLRequired = true)]
-    public void onVehicleCommand(Client player, string vehicleIdOrName)
+    public void onVehicleCommand(Client player, string vehicleName)
     {
         var playerPosition = API.getEntityPosition(player);
         var playerRotation = API.getEntityRotation(player);
@@ -164,11 +179,21 @@ public class AdminScript : Script
 
         foreach (var vehicleHash in Enum.GetValues(typeof(VehicleHash)).Cast<VehicleHash>())
         {
-            vehicleDictionary.Add(vehicleHash.ToString(), vehicleHash);
+            vehicleDictionary.Add(vehicleHash.ToString().ToLower(), vehicleHash);
         }
 
-        var vehicle = vehicleDictionary.FirstOrDefault(v => v.Key.StartsWith(vehicleIdOrName)).Value;
+        var vehicle = vehicleDictionary.FirstOrDefault(v => v.Key.StartsWith(vehicleName.ToLower())).Value;
 
-        API.createVehicle(vehicle, playerPosition, playerRotation, 0, 0);
+        var createdVehicle = API.createVehicle(vehicle, playerPosition, playerRotation, 0, 0);
+        createdVehicle.numberPlate = player.name;
+        API.setPlayerIntoVehicle(player, createdVehicle, -1);
+    }
+
+    [Command("vr", ACLRequired = true)]
+    public void onVehicleRepairCommand(Client player)
+    {
+        var playerVehicle = API.getPlayerVehicle(player);
+
+        API.repairVehicle(playerVehicle);
     }
 }
